@@ -75,8 +75,8 @@ typedef unsigned short UBaseType_t;
 /*-----------------------------------------------------------*/
 
 /* Interrupt control macros. */
-#define portDISABLE_INTERRUPTS()    _disable_interrupt(); _nop()
-#define portENABLE_INTERRUPTS()     _enable_interrupt(); _nop()
+#define portDISABLE_INTERRUPTS()    __disable_interrupt(); __nop()
+#define portENABLE_INTERRUPTS()     __enable_interrupt(); __nop()
 /*-----------------------------------------------------------*/
 
 /* Critical section control macros. */
