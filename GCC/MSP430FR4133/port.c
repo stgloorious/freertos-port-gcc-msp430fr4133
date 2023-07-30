@@ -92,7 +92,10 @@ uint32_t *pulTopOfStack, ulTemp;
     if( sizeof( pxCode ) == sizeof( uint16_t ) )
     {
         pusTopOfStack = ( uint16_t * ) pxTopOfStack;
-        ulTemp = ( uint32_t ) (uint16_t *) pxCode;
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Werror=pointer-to-int-cast"
+        ulTemp = ( uint32_t )pxCode;
+        #pragma GCC diagnostic pop
         *pusTopOfStack = ( uint16_t ) ulTemp;
     }
     else
@@ -101,7 +104,10 @@ uint32_t *pulTopOfStack, ulTemp;
         pusTopOfStack = ( uint16_t * ) pxTopOfStack;
         pusTopOfStack--;
         pulTopOfStack = ( uint32_t * ) pusTopOfStack;
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Werror=pointer-to-int-cast"
         *pulTopOfStack = ( uint32_t ) pxCode;
+        #pragma GCC diagnostic pop
     }
 
     pusTopOfStack--;
@@ -170,8 +176,7 @@ void vPortSetupTimerInterrupt( void )
 }
 /*-----------------------------------------------------------*/
 
-#pragma vector=configTICK_VECTOR
-interrupt void vTickISREntry( void )
+void __attribute__ ((interrupt(TIMER0_A0_VECTOR))) vTickISREntry (void)
 {
 extern void vPortTickISR( void );
 
