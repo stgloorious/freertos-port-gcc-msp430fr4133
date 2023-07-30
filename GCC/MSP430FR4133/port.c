@@ -93,7 +93,7 @@ uint32_t *pulTopOfStack, ulTemp;
     {
         pusTopOfStack = ( uint16_t * ) pxTopOfStack;
         #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Werror=pointer-to-int-cast"
+        #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
         ulTemp = ( uint32_t )pxCode;
         #pragma GCC diagnostic pop
         *pusTopOfStack = ( uint16_t ) ulTemp;
@@ -105,7 +105,7 @@ uint32_t *pulTopOfStack, ulTemp;
         pusTopOfStack--;
         pulTopOfStack = ( uint32_t * ) pusTopOfStack;
         #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Werror=pointer-to-int-cast"
+        #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
         *pulTopOfStack = ( uint32_t ) pxCode;
         #pragma GCC diagnostic pop
     }
