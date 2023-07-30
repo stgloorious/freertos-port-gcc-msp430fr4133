@@ -1,5 +1,6 @@
 /*
- * FreeRTOS Kernel V10.6.0
+ * Copyright (C) 2023 Stefan Gloor
+ * Forked from FreeRTOS Kernel V10.6.0
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
