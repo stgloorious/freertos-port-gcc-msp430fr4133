@@ -167,6 +167,10 @@ void vPortEndScheduler( void )
 }
 /*-----------------------------------------------------------*/
 
+void vPortPreemptiveTickISR(){
+    
+}
+
 /*
  * Hardware initialisation to generate the RTOS tick.
  */
