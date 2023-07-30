@@ -92,7 +92,7 @@ uint32_t *pulTopOfStack, ulTemp;
     if( sizeof( pxCode ) == sizeof( uint16_t ) )
     {
         pusTopOfStack = ( uint16_t * ) pxTopOfStack;
-        ulTemp = ( uint32_t ) pxCode;
+        ulTemp = ( uint32_t ) (uint16_t *) pxCode;
         *pusTopOfStack = ( uint16_t ) ulTemp;
     }
     else
