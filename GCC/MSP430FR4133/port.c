@@ -71,75 +71,72 @@ void vPortSetupTimerInterrupt( void );
  *
  * See the header file portable.h.
  */
-StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters )
+StackType_t *pxPortInitialiseStack( StackType_t *pusTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 {
 uint16_t *pusTopOfStack;
-uint32_t *pulTopOfStack, ulTemp;
+uint32_t *ulTemp;
 
     /*
         Place a few bytes of known values on the bottom of the stack.
         This is just useful for debugging and can be included if required.
 
-        *pxTopOfStack = ( StackType_t ) 0x1111;
-        pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) 0x2222;
-        pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) 0x3333;
-        pxTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0x1111;
+        pusTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0x2222;
+        pusTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0x3333;
+        pusTopOfStack--;
     */
 
     /* Data types are 16 bits in small data and code model */
-    pusTopOfStack = ( uint16_t * ) pxTopOfStack;
-    ulTemp = ( uint32_t )(uint16_t)pxCode;
+    pusTopOfStack = ( uint16_t * ) pusTopOfStack;
+    ulTemp = ( uint32_t )( uint16_t )pxCode;
     *pusTopOfStack = ( uint16_t ) ulTemp;
 
     pusTopOfStack--;
     *pusTopOfStack = portFLAGS_INT_ENABLED;
     pusTopOfStack -= ( sizeof( StackType_t ) / 2 );
 
-    /* From here on the size of stacked items depends on the memory model. */
-    pxTopOfStack = ( StackType_t * ) pusTopOfStack;
-
     /* Next the general purpose registers. */
     #ifdef PRELOAD_REGISTER_VALUES
-        *pxTopOfStack = ( StackType_t ) 0xffff;
-        pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) 0xeeee;
-        pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) 0xdddd;
-        pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) pvParameters;
-        pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) 0xbbbb;
-        pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) 0xaaaa;
-        pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) 0x9999;
-        pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) 0x8888;
-        pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) 0x5555;
-        pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) 0x6666;
-        pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) 0x5555;
-        pxTopOfStack--;
-        *pxTopOfStack = ( StackType_t ) 0x4444;
-        pxTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0xffff;
+        pusTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0xeeee;
+        pusTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0xdddd;
+        pusTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) pvParameters;
+        pusTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0xbbbb;
+        pusTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0xaaaa;
+        pusTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0x9999;
+        pusTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0x8888;
+        pusTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0x5555;
+        pusTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0x6666;
+        pusTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0x5555;
+        pusTopOfStack--;
+        *pusTopOfStack = ( StackType_t ) 0x4444;
+        pusTopOfStack--;
     #else
-        pxTopOfStack -= 3;
-        *pxTopOfStack = ( StackType_t ) pvParameters;
-        pxTopOfStack -= 9;
+        pusTopOfStack -= 3;
+        *pusTopOfStack = ( StackType_t ) pvParameters;
+        pusTopOfStack -= 9;
     #endif
 
     /* A variable is used to keep track of the critical section nesting.
     This variable has to be stored as part of the task context and is
     initially set to zero. */
-    *pxTopOfStack = ( StackType_t ) portNO_CRITICAL_SECTION_NESTING;
+    *pusTopOfStack = ( StackType_t ) portNO_CRITICAL_SECTION_NESTING;
 
     /* Return a pointer to the top of the stack we have generated so this can
     be stored in the task control block for the task. */
-    return pxTopOfStack;
+    return pusTopOfStack;
 }
 /*-----------------------------------------------------------*/
 void vPortYield(){
