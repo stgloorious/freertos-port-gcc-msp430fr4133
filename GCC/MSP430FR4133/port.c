@@ -73,7 +73,7 @@ void vPortSetupTimerInterrupt( void );
  */
 StackType_t *pxPortInitialiseStack( StackType_t *pusTopOfStack, TaskFunction_t pxCode, void *pvParameters )
 {
-uint32_t *ulTemp;
+uint32_t ulTemp;
 
     /*
         Place a few bytes of known values on the bottom of the stack.
