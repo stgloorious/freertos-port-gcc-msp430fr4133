@@ -29,8 +29,6 @@
 ; * The definition of the "register test" tasks, as described at the top of
 ; * main.c
 
-    .include data_model.h
-
     .global xTaskIncrementTick
     .global vTaskSwitchContext
     .global vPortSetupTimerInterrupt
@@ -47,25 +45,25 @@
 portSAVE_CONTEXT .macro
 
     ;Save the remaining registers.
-    pushm_x #12, r15
+    pushm.w #12, r15
     movx.w   &usCriticalNesting, r14
-    push_x r14
-    mov_x   &pxCurrentTCB, r12
-    mov_x   sp, 0( r12 )
+    push.w r14
+    mov.x   &pxCurrentTCB, r12
+    mov.x   sp, 0( r12 )
     .endm
 ;-----------------------------------------------------------
 
 portRESTORE_CONTEXT .macro
 
-    mov_x   &pxCurrentTCB, r12
-    mov_x   @r12, sp
-    pop_x   r15
+    mov.x   &pxCurrentTCB, r12
+    mov.x   @r12, sp
+    pop.w   r15
     movx.w   r15, &usCriticalNesting
-    popm_x  #12, r15
+    popm.w  #12, r15
     nop
     pop.w   sr
     nop
-    ret_x
+    ret
     .endm
 ;-----------------------------------------------------------
 
@@ -88,8 +86,8 @@ vPortPreemptiveTickISR: .asmfunc
     push.w sr
     portSAVE_CONTEXT
 
-    call_x  #xTaskIncrementTick
-    call_x  #vTaskSwitchContext
+    call  #xTaskIncrementTick
+    call  #vTaskSwitchContext
 
     portRESTORE_CONTEXT
     .endasmfunc
@@ -104,7 +102,7 @@ vPortCooperativeTickISR: .asmfunc
     push.w sr
     portSAVE_CONTEXT
 
-    call_x  #xTaskIncrementTick
+    call  #xTaskIncrementTick
 
     portRESTORE_CONTEXT
 
@@ -130,7 +128,7 @@ vPortYield: .asmfunc
     portSAVE_CONTEXT
 
     ; Select the next task to run.
-    call_x  #vTaskSwitchContext
+    call  #vTaskSwitchContext
 
     ; Restore the context of the new task.
     portRESTORE_CONTEXT
@@ -149,7 +147,7 @@ xPortStartScheduler: .asmfunc
 
     ; Setup the hardware to generate the tick.  Interrupts are disabled
     ; when this function is called.
-    call_x  #vPortSetupTimerInterrupt
+    call  #vPortSetupTimerInterrupt
 
     ; Restore the context of the first task that is going to run.
     portRESTORE_CONTEXT
