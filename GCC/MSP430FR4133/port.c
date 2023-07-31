@@ -88,28 +88,10 @@ uint32_t *pulTopOfStack, ulTemp;
         pxTopOfStack--;
     */
 
-    /* Data types are need either 16 bits or 32 bits depending on the data
-    and code model used. */
-    if( sizeof( pxCode ) == sizeof( uint16_t ) )
-    {
-        pusTopOfStack = ( uint16_t * ) pxTopOfStack;
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
-        ulTemp = ( uint32_t )pxCode;
-        #pragma GCC diagnostic pop
-        *pusTopOfStack = ( uint16_t ) ulTemp;
-    }
-    else
-    {
-        /* Make room for a 20 bit value stored as a 32 bit value. */
-        pusTopOfStack = ( uint16_t * ) pxTopOfStack;
-        pusTopOfStack--;
-        pulTopOfStack = ( uint32_t * ) pusTopOfStack;
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
-        *pulTopOfStack = ( uint32_t ) pxCode;
-        #pragma GCC diagnostic pop
-    }
+    /* Data types are 16 bits in small data and code model */
+    pusTopOfStack = ( uint16_t * ) pxTopOfStack;
+    ulTemp = ( uint32_t )(uint16_t)pxCode;
+    *pusTopOfStack = ( uint16_t ) ulTemp;
 
     pusTopOfStack--;
     *pusTopOfStack = portFLAGS_INT_ENABLED;
@@ -160,6 +142,13 @@ uint32_t *pulTopOfStack, ulTemp;
     return pxTopOfStack;
 }
 /*-----------------------------------------------------------*/
+void vPortYield(){
+    
+}
+
+BaseType_t xPortStartScheduler(){
+    return (BaseType_t)NULL;
+}
 
 void vPortEndScheduler( void )
 {
