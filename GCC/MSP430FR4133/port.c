@@ -61,7 +61,8 @@ volatile uint16_t usCriticalNesting = portINITIAL_CRITICAL_NESTING;
  * Sets up the periodic ISR used for the RTOS tick.  This uses timer 0, but
  * could have alternatively used the watchdog timer or timer 1.
  */
-void prvSetupTimerInterrupt( void );
+void vPortSetupTimerInterrupt( void );
+static void prvSetupTimerInterrupt( void );
 /*-----------------------------------------------------------*/
 
 /* 
