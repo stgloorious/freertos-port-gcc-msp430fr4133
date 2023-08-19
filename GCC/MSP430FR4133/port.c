@@ -284,6 +284,6 @@ static void prvSetupTimerInterrupt( void )
 	/* Up mode. */
 	TA0CTL |= MC_1;
 
-    _enable_interrupt();
+    _enable_interrupts();
 }
 
