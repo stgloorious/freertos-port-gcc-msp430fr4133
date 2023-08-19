@@ -232,7 +232,9 @@ extern void vPortTickISR( void );
 }
 
 void vPortPreemptiveTickISR(){
-    
+    portSAVE_CONTEXT();
+    vTaskSwitchContext();
+    portRESTORE_CONTEXT();
 }
 /*
  * Manual context switch called by portYIELD or taskYIELD.  
