@@ -261,7 +261,9 @@ void vPortYield( void )
 
 static void prvSetupTimerInterrupt( void )
 {
-	/* Ensure the timer is stopped. */
+	_disable_interrupts();
+
+    /* Ensure the timer is stopped. */
 	TA0CTL = 0;
 
 	/* Run the timer of the ACLK. */
@@ -281,5 +283,7 @@ static void prvSetupTimerInterrupt( void )
 
 	/* Up mode. */
 	TA0CTL |= MC_1;
+
+    _enable_interrupt();
 }
 
