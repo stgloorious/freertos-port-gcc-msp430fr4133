@@ -57,13 +57,62 @@ sequence. */
 volatile uint16_t usCriticalNesting = portINITIAL_CRITICAL_NESTING;
 /*-----------------------------------------------------------*/
 
-
 /*
  * Sets up the periodic ISR used for the RTOS tick.  This uses timer 0, but
  * could have alternatively used the watchdog timer or timer 1.
  */
 void vPortSetupTimerInterrupt( void );
 /*-----------------------------------------------------------*/
+
+/* 
+ * Macro to restore a task context from the task stack.  This is effectively
+ * the reverse of portSAVE_CONTEXT().  First the stack pointer value is
+ * loaded from the task control block.  Next the value for usCriticalNesting
+ * used by the task is retrieved from the stack - followed by the value of all
+ * the general purpose msp430 registers.
+ *
+ * The bic instruction ensures there are no low power bits set in the status
+ * register that is about to be popped from the stack.
+ */
+#define portRESTORE_CONTEXT()								\
+	asm volatile (	"mov.w	pxCurrentTCB, r12		\n\t"	\
+					"mov.w	@r12, r1				\n\t"	\
+					"pop	r15						\n\t"	\
+					"mov.w	r15, usCriticalNesting	\n\t"	\
+					"pop	r15						\n\t"	\
+					"pop	r14						\n\t"	\
+					"pop	r13						\n\t"	\
+					"pop	r12						\n\t"	\
+					"pop	r11						\n\t"	\
+					"pop	r10						\n\t"	\
+					"pop	r9						\n\t"	\
+					"pop	r8						\n\t"	\
+					"pop	r7						\n\t"	\
+					"pop	r6						\n\t"	\
+					"pop	r5						\n\t"	\
+					"pop	r4						\n\t"	\
+					"bic	#(0xf0),0(r1)			\n\t"	\
+					"reti							\n\t"	\
+				);
+
+#define portSAVE_CONTEXT()									\
+	asm volatile (	"push	r4						\n\t"	\
+					"push	r5						\n\t"	\
+					"push	r6						\n\t"	\
+					"push	r7						\n\t"	\
+					"push	r8						\n\t"	\
+					"push	r9						\n\t"	\
+					"push	r10						\n\t"	\
+					"push	r11						\n\t"	\
+					"push	r12						\n\t"	\
+					"push	r13						\n\t"	\
+					"push	r14						\n\t"	\
+					"push	r15						\n\t"	\
+					"mov.w	usCriticalNesting, r14	\n\t"	\
+					"push	r14						\n\t"	\
+					"mov.w	pxCurrentTCB, r12		\n\t"	\
+					"mov.w	r1, @r12				\n\t"	\
+				);
 
 /*
  * Initialise the stack of a task to look exactly as if a call to
@@ -137,13 +186,18 @@ uint32_t ulTemp;
     be stored in the task control block for the task. */
     return pusTopOfStack;
 }
-/*-----------------------------------------------------------*/
-void vPortYield(){
-    
-}
 
-BaseType_t xPortStartScheduler(){
-    return (BaseType_t)NULL;
+BaseType_t xPortStartScheduler( void )
+{
+	/* Setup the hardware to generate the tick.  Interrupts are disabled when
+	this function is called. */
+	prvSetupTimerInterrupt();
+
+	/* Restore the context of the first task that is going to run. */
+	portRESTORE_CONTEXT();
+
+	/* Should not get here as the tasks are now running! */
+	return pdTRUE;
 }
 
 void vPortEndScheduler( void )
@@ -158,7 +212,7 @@ void vPortEndScheduler( void )
  */
 void vPortSetupTimerInterrupt( void )
 {
-    vApplicationSetupTimerInterrupt();
+    prvSetupTimerInterrupt();
 }
 /*-----------------------------------------------------------*/
 
@@ -178,5 +232,53 @@ extern void vPortTickISR( void );
 
 void vPortPreemptiveTickISR(){
     
+}
+/*
+ * Manual context switch called by portYIELD or taskYIELD.  
+ *
+ * The first thing we do is save the registers so we can use a naked attribute.
+ */
+void vPortYield( void ) __attribute__ ( ( naked ) );
+void vPortYield( void )
+{
+	/* We want the stack of the task being saved to look exactly as if the task
+	was saved during a pre-emptive RTOS tick ISR.  Before calling an ISR the 
+	msp430 places the status register onto the stack.  As this is a function 
+	call and not an ISR we have to do this manually. */
+	asm volatile ( "push	r2" );
+	_DINT();
+
+	/* Save the context of the current task. */
+	portSAVE_CONTEXT();
+
+	/* Switch to the highest priority task that is ready to run. */
+	vTaskSwitchContext();
+
+	/* Restore the context of the new task. */
+	portRESTORE_CONTEXT();
+}
+
+static void prvSetupTimerInterrupt( void )
+{
+	/* Ensure the timer is stopped. */
+	TACTL = 0;
+
+	/* Run the timer of the ACLK. */
+	TACTL = TASSEL_1;
+
+	/* Clear everything to start with. */
+	TACTL |= TACLR;
+
+	/* Set the compare match value according to the tick rate we want. */
+	TACCR0 = portACLK_FREQUENCY_HZ / configTICK_RATE_HZ;
+
+	/* Enable the interrupts. */
+	TACCTL0 = CCIE;
+
+	/* Start up clean. */
+	TACTL |= TACLR;
+
+	/* Up mode. */
+	TACTL |= MC_1;
 }
 
