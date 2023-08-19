@@ -262,24 +262,24 @@ void vPortYield( void )
 static void prvSetupTimerInterrupt( void )
 {
 	/* Ensure the timer is stopped. */
-	TA1CTL = 0;
+	TA0CTL = 0;
 
 	/* Run the timer of the ACLK. */
-	TA1CTL = TASSEL_1;
+	TA0CTL = TASSEL_1;
 
 	/* Clear everything to start with. */
-	TA1CTL |= TACLR;
+	TA0CTL |= TACLR;
 
 	/* Set the compare match value according to the tick rate we want. */
-	TA1CCR0 = portACLK_FREQUENCY_HZ / configTICK_RATE_HZ;
+	TA0CCR0 = portACLK_FREQUENCY_HZ / configTICK_RATE_HZ;
 
 	/* Enable the interrupts. */
-	TA1CCTL0 = CCIE;
+	TA0CCTL0 = CCIE;
 
 	/* Start up clean. */
-	TA1CTL |= TACLR;
+	TA0CTL |= TACLR;
 
 	/* Up mode. */
-	TA1CTL |= MC_1;
+	TA0CTL |= MC_1;
 }
 
