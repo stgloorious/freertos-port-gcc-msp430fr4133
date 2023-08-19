@@ -61,7 +61,7 @@ volatile uint16_t usCriticalNesting = portINITIAL_CRITICAL_NESTING;
  * Sets up the periodic ISR used for the RTOS tick.  This uses timer 0, but
  * could have alternatively used the watchdog timer or timer 1.
  */
-void vPortSetupTimerInterrupt( void );
+void prvSetupTimerInterrupt( void );
 /*-----------------------------------------------------------*/
 
 /* 
@@ -261,24 +261,24 @@ void vPortYield( void )
 static void prvSetupTimerInterrupt( void )
 {
 	/* Ensure the timer is stopped. */
-	TACTL = 0;
+	TA1CTL = 0;
 
 	/* Run the timer of the ACLK. */
-	TACTL = TASSEL_1;
+	TA1CTL = TASSEL_1;
 
 	/* Clear everything to start with. */
-	TACTL |= TACLR;
+	TA1CTL |= TACLR;
 
 	/* Set the compare match value according to the tick rate we want. */
-	TACCR0 = portACLK_FREQUENCY_HZ / configTICK_RATE_HZ;
+	TA1CCR0 = portACLK_FREQUENCY_HZ / configTICK_RATE_HZ;
 
 	/* Enable the interrupts. */
-	TACCTL0 = CCIE;
+	TA1CCTL0 = CCIE;
 
 	/* Start up clean. */
-	TACTL |= TACLR;
+	TA1CTL |= TACLR;
 
 	/* Up mode. */
-	TACTL |= MC_1;
+	TA1CTL |= MC_1;
 }
 
