@@ -65,56 +65,26 @@ void vPortSetupTimerInterrupt( void );
 static void prvSetupTimerInterrupt( void );
 /*-----------------------------------------------------------*/
 
-/* 
- * Macro to restore a task context from the task stack.  This is effectively
- * the reverse of portSAVE_CONTEXT().  First the stack pointer value is
- * loaded from the task control block.  Next the value for usCriticalNesting
- * used by the task is retrieved from the stack - followed by the value of all
- * the general purpose msp430 registers.
- *
- * The bic instruction ensures there are no low power bits set in the status
- * register that is about to be popped from the stack.
- */
-#define portRESTORE_CONTEXT()								\
-	asm volatile (	"mov.w	pxCurrentTCB, r12		\n\t"	\
-					"mov.w	@r12, r1				\n\t"	\
-					"pop	r15						\n\t"	\
-					"mov.w	r15, usCriticalNesting	\n\t"	\
-					"pop	r15						\n\t"	\
-					"pop	r14						\n\t"	\
-					"pop	r13						\n\t"	\
-					"pop	r12						\n\t"	\
-					"pop	r11						\n\t"	\
-					"pop	r10						\n\t"	\
-					"pop	r9						\n\t"	\
-					"pop	r8						\n\t"	\
-					"pop	r7						\n\t"	\
-					"pop	r6						\n\t"	\
-					"pop	r5						\n\t"	\
-					"pop	r4						\n\t"	\
-					"bic	#(0xf0),0(r1)			\n\t"	\
-					"reti							\n\t"	\
-				);
+#define portSAVE_CONTEXT()								    \
+    asm volatile (  "push.w sr                       \n\t"  \
+                    "pushm.w #12, r15                \n\t"  \
+                    "mov.w	 &usCriticalNesting, r14 \n\t"  \
+	                "push.w  r14                     \n\t"  \
+	                "mov.w	&pxCurrentTCB, r12       \n\t"  \
+	                "mov.w	sp, 0( r12 )             \n\t"  \
+                );
 
-#define portSAVE_CONTEXT()									\
-	asm volatile (	"push	r4						\n\t"	\
-					"push	r5						\n\t"	\
-					"push	r6						\n\t"	\
-					"push	r7						\n\t"	\
-					"push	r8						\n\t"	\
-					"push	r9						\n\t"	\
-					"push	r10						\n\t"	\
-					"push	r11						\n\t"	\
-					"push	r12						\n\t"	\
-					"push	r13						\n\t"	\
-					"push	r14						\n\t"	\
-					"push	r15						\n\t"	\
-					"mov.w	usCriticalNesting, r14	\n\t"	\
-					"push	r14						\n\t"	\
-					"mov.w	pxCurrentTCB, r12		\n\t"	\
-					"mov.w	r1, @r12				\n\t"	\
-				);
-
+#define portRESTORE_CONTEXT()                               \
+    asm volatile (  "mov.w	&pxCurrentTCB, r12       \n\t"  \
+	                "mov.w	@r12, sp                 \n\t"  \
+	                "pop.w	r15                      \n\t"  \
+	                "mov.w	r15, &usCriticalNesting  \n\t"  \
+	                "popm.w	#12, r15                 \n\t"  \
+	                "nop                             \n\t"  \
+	                "pop.w	sr                       \n\t"  \
+	                "nop                             \n\t"  \
+	                "ret                             \n\t"  \
+                );
 /*
  * Initialise the stack of a task to look exactly as if a call to
  * portSAVE_CONTEXT had been called.
